@@ -6,7 +6,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import warehouse.model.ProductData;
+import warehouse.model.Warehouse;
 import warehouse.repository.WarehouseRepository;
+
+import java.util.ArrayList;
 
 @SpringBootApplication
 public class Application implements CommandLineRunner {
@@ -20,47 +23,33 @@ public class Application implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-
-		// Initialize product data repository
 		repository.deleteAll();
 
-		// save a couple of product data
-		repository.save(new ProductData("1","00-443175","Bio Orangensaft Sonne","Getraenk", 2500));
-		repository.save(new ProductData("1","00-871895","Bio Apfelsaft Gold","Getraenk", 3420));
-		repository.save(new ProductData("1","01-926885","Ariel Waschmittel Color","Waschmittel", 478));
-		repository.save(new ProductData("1","02-234811","Mampfi Katzenfutter Rind","Tierfutter", 1324));
-		repository.save(new ProductData("2","03-893173","Saugstauberbeutel Ingres","Reinigung", 7390));
-		System.out.println();
+		String[] categories = {"Getränke", "Gemüse", "Elektronik", "Milchprodukte", "Obst", "Gepaeck"};
+		String[] cities = {"Wien", "Korneuburg", "Salzburg", "Graz", "Innsbruck"};
+		int productCounter = 1;
 
-		// fetch all products
-		System.out.println("ProductData found with findAll():");
-		System.out.println("-------------------------------");
-		for (ProductData productdata : repository.findAll()) {
-			System.out.println(productdata);
+		for (int w = 0; w < 5; w++) {
+			String wID = String.valueOf(w + 1);
+			Warehouse warehouse = new Warehouse();
+			warehouse.setWarehouseID(wID);
+			warehouse.setWarehouseName("Lager " + cities[w]);
+			warehouse.setWarehouseCity(cities[w]);
+			warehouse.setWarehouseCountry("Austria");
+			warehouse.setProductData(new ArrayList<>());
+
+			for (int p = 0; p < 60; p++) {
+				String pID = "PROD-" + productCounter;
+				String pName = "Produkt " + productCounter;
+				String category = categories[p % 6];
+				double quantity = Math.round((Math.random() * 1000) * 100.0) / 100.0;
+
+				ProductData product = new ProductData(wID, pID, pName, category, quantity);
+				warehouse.getProductData().add(product);
+				productCounter++;
+			}
+			repository.save(warehouse);
 		}
-		System.out.println();
-
-		// Fetch single product
-		System.out.println("Record(s) found with ProductID(\"00-871895\"):");
-		System.out.println("--------------------------------");
-		System.out.println(repository.findByProductID("00-871895"));
-		System.out.println();
-
-		// Fetch all products of Warehouse 1
-		System.out.println("Record(s) found with findByWarehouseID(\"1\"):");
-		System.out.println("--------------------------------");
-		for (ProductData productdata : repository.findByWarehouseID("1")) {
-			System.out.println(productdata);
-		}
-		System.out.println();
-
-		// Fetch all products of Warehouse 2
-		System.out.println("Record(s) found with findByWarehouseID(\"2\"):");
-		System.out.println("--------------------------------");
-		for (ProductData productdata : repository.findByWarehouseID("2")) {
-			System.out.println(productdata);
-		}
-
+		System.out.println("5 lager mit 300 produkten erstellt");
 	}
-
 }
