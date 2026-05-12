@@ -101,12 +101,19 @@ db.warehouseData.aggregate([
 
 ![s02.png](s02.png)
 
-**F3: Artikelanzahl pro Lagerstandort**
+**F3: Artikelanzahl pro Lagerstandort nach Kategorie**
 
 ```javascript
 db.warehouseData.aggregate([
   { $unwind: "$productData" },
-  { $group: { _id: "$warehouseName", artikelAnzahl: { $sum: "$productData.productQuantity" } } }
+  { $group: { 
+      _id: { 
+          Standort: "$warehouseName", 
+          Kategorie: "$productData.productCategory" 
+      }, 
+      artikelAnzahl: { $sum: "$productData.productQuantity" } 
+  }},
+  { $sort: { "_id.Standort": 1, "_id.Kategorie": 1 } }
 ])
 
 ```
